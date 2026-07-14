@@ -68,15 +68,15 @@ def resample_flight(df, freq, max_gap_s=None):
 
     return out.reset_index().rename(columns={"index": "timestamp"})
 
-def resample_all(df, freq="10s", max_gap_s=None, n_jobs=-1):
+def resample_all(df, freq="10s", max_gap_s=None, n_jobs=-1, show_progress=False):
     """Parallel resampling. max_gap_s=None means full interpolation across all gaps."""
-    
+
     flights = [g for _, g in df.groupby("flight_id", sort=True)]
-    
+
     results = Parallel(n_jobs=n_jobs, verbose=0)(
-        delayed(resample_flight)(f, freq, max_gap_s) 
-        for f in tqdm(flights, desc="Resampling")
+        delayed(resample_flight)(f, freq, max_gap_s)
+        for f in tqdm(flights, desc="Resampling", disable=not show_progress)
     )
-    
+
     results = [r for r in results if r is not None]
     return pd.concat(results, ignore_index=True)

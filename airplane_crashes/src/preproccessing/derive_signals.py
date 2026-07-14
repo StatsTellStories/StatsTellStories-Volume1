@@ -36,10 +36,11 @@ def add_derived_signals(df_flight):
     return df
 
 
-def add_derived_signals_all(df, n_jobs=-1):
-    """Apply to all flights in parallel."""    
+def add_derived_signals_all(df, n_jobs=-1, show_progress=False):
+    """Apply to all flights in parallel."""
     flights = [g for _, g in df.groupby("flight_id", sort=False)]
     results = Parallel(n_jobs=n_jobs)(
-        delayed(add_derived_signals)(f) for f in tqdm(flights, desc="Derived signals")
+        delayed(add_derived_signals)(f)
+        for f in tqdm(flights, desc="Derived signals", disable=not show_progress)
     )
     return pd.concat(results, ignore_index=True)
